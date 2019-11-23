@@ -24,14 +24,15 @@ dataframe_autism <- na.omit(dataframe_autism)
 # Rename column 'Class/ASD' to 'class_asd'
 names(dataframe_autism)[21] <- 'class_asd'
 
+# ================================================================================
 # CASE 01 - Relation between occurrences of jundice in patients diagnosed with ASD
 # Filter cases of ASD positive on occurrences of patients born with jundice
 filter_jundice_asd <- filter(dataframe_autism, jundice %in% c("yes"))
     
 # Get total of 'yes' & 'no' on class_asd
 count(filter_jundice_asd, class_asd)
-jundice_with_asd <- 28
-jundice_without_asd <- 31
+jundice_with_asd <- 28 # Yes
+jundice_without_asd <- 31 # No
 
 # Set values for slices of pie chart
 slices <- c(jundice_with_asd, jundice_without_asd)
@@ -53,18 +54,45 @@ pie(slices,
     sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on positive cases of Jundice'
     )
 
-# CASE 02 - Ethnicity x ASD positive
-barplot(
-    
+# ================================================================================
+# CASE 02 - Occurrences of ASD positive by different ethnicities
+
+# Fitting Labels horizontally
+par(las=2) # Make label text perpendicular to axis
+par(mar=c(5,8,4,2)) # Increase y-axis margin.
+
+filter_ethnicity_asd <- filter(dataframe_autism, class_asd %in% c('YES'))
+ehtnicity_asd <- table(filter_ethnicity_asd$class_asd, filter_ethnicity_asd$ethnicity)
+
+barplot(ehtnicity_asd,
+        main = 'Ethnicity x ASD Positive',
+        sub = '',
+        horiz=TRUE,
+        space = 0.2,
+        cex.names=0.7,
+        xlab = 'ASD Cases',
+        xlim = c(0, 120)
         )
 
-# CASE 03 - Ethnicity x Jundice x ASD posittive
+geom_bar(ehtnicity_asd,
+         main = 'Ethnicity x ASD Positive',
+         sub = '',
+         horiz=TRUE,
+         space = 0.2,
+         cex.names=0.7,
+         border = TRUE,
+         xlab = 'ASD Cases',
+         xlim = c(0, 120)
+        )
+
+# ================================================================================
+# CASE 03 - Ethnicity x Jundice x ASD positive
 colors <- c("#999999", "#E69F00", "#56B4E9")
 scatterplot3d(filter_jundice_asd,
               x = filter_jundice_asd$ethnicity,
               y = filter_jundice_asd$jundice,
               z = filter_jundice_asd$class_asd,
-              main = 'Ethnicity x Jundice x ASD posittive',
+              main = 'Ethnicity x Jundice x ASD Positive',
               sub = '',
               xlab = '',
               ylab = '',
@@ -72,15 +100,36 @@ scatterplot3d(filter_jundice_asd,
               color = colors
               )
 
+# ================================================================================
 # CASE 04 - 
+# Stacked Bar Plot with Colors and Legend
+filter_country_asd <- filter(dataframe_autism, class_asd %in% c('YES'))
+ehtnicity_asd <- table(filter_ethnicity_asd$class_asd, filter_ethnicity_asd$ethnicity)
+
+barplot(counts,
+        main = "Car Distribution by Gears and VS",
+        xlab = "Number of Gears",
+        col=c("darkblue","red"),
+        legend = rownames(counts))
+# ================================================================================
 # CASE 05 - 
+
+# ================================================================================
 # CASE 06 - 
+
+# ================================================================================
 # CASE 07 - 
+
+# ================================================================================
 # CASE 08 - 
 
 
-# analisar % de quando preenchido pela propria pessoa / outros com ASD
 
+
+
+
+
+# Analisar % de quando preenchido pela propria pessoa / outros com ASD
 
 
 
@@ -89,17 +138,13 @@ scatterplot3d(filter_jundice_asd,
 # representem os dados. Para isso, será necessário utilizar técnicas de visualização
 # de dados.
 
-
 # Se for pertinente, aplicar técnicas de redução de dimensionalidade
-
 
 # Aplicar um dos algoritmos estudados em Inteligência Artificial. Discutir a tarefa de
 # aprendizado de máquinas sendo tratada, e a escolha do algoritmo.
 
-
 # Apresentar e discutir os resultados obtidos.
 
-
-
 # A data de entrega e apresentação do trabalho será dia 02/12, durante a aula.
-# A dupla deverá, além de ap
+# A dupla deverá, além de apresentar, entregar um relatório impresso, contendo também o
+# código R para execução.
