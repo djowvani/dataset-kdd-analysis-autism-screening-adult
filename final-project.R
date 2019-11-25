@@ -30,13 +30,16 @@ names(dataframe_autism)[15] <- 'immediate_family_with_asd'
 # Rename column 'contry_of_res' to 'country_of_residence'
 names(dataframe_autism)[16] <- 'country_of_residence'
 
+# Rename column 'relation' to 'who_is_completing_the_test'
+names(dataframe_autism)[20] <- 'who_is_completing_the_test'
+
 # Rename column 'Class/ASD' to 'class_asd'
 names(dataframe_autism)[21] <- 'class_asd'
 
 # ================================================================================
 # CASE 01 - Relation between occurrences of jaundice in patients diagnosed with ASD
 # Filter cases of ASD positive on occurrences of patients born with jaundice
-filter_jaundice_yes <- filter(dataframe_autism, jaundice %in% c("yes"))
+filter_jaundice_yes <- filter(dataframe_autism, jaundice %in% c('yes'))
     
 # Get total of 'yes' & 'no' on class_asd
 count(filter_jaundice_yes, class_asd)
@@ -49,7 +52,7 @@ slices <- c(jaundice_with_asd, jaundice_without_asd)
 # Set labels for slices of pie chart
 lbls <- c('ASD', 'Non-ASD')
 # Rounds values to 100% format
-pct <- round(slices / sum(slices)*100)
+pct <- round(slices / sum(slices) * 100)
 # Add percents to labels
 lbls <- paste(lbls, pct)
 # Add % to labels
@@ -58,7 +61,7 @@ lbls <- paste(lbls,'%', sep = '')
 # Pie chart plot
 pie(slices,
     labels = lbls,
-    col = c("purple", "green"),
+    col = c('purple', 'green'),
     main = 'Occurrences of Autism on Jaundice',
     sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on positive cases of Jaundice'
     )
@@ -74,8 +77,8 @@ ehtnicity_asd <- table(dataframe_autism$class_asd, dataframe_autism$ethnicity)
 barplot(ehtnicity_asd,
         main = 'Ethnicity x ASD Cases',
         sub = 'ASD Positive occurrences by different Ethnicities',
-        xlab = "ASD Cases",
-        col = c("green", "purple"),
+        xlab = 'ASD Cases',
+        col = c('green', 'purple'),
         space = 0.2,
         horiz = TRUE,
         cex.names = 0.9,
@@ -84,26 +87,54 @@ barplot(ehtnicity_asd,
         args.legend = list(
             x = 230,
             y = 10,
-            bty = "a"
+            bty = 'a'
             ),
         )
 
 # ================================================================================
-# CASE 03 - 
+# CASE 03 - Occurrences of ASD on idividuals with immediate family members also with ASD
+# Filter cases of ASD positive on occurrences of patients with immediate parents with ASD
 immediate_family_with_asd <- filter(dataframe_autism, immediate_family_with_asd %in% c('yes'))
 
-# ================================================================================
-# CASE 04 - 
+# Get total of 'yes' & 'no' on class_asd
+count(immediate_family_with_asd, class_asd)
+immediate_family_with_asd <- 41 # Yes
+immediate_family_without_asd <- 44 # No
 
+# Set values for slices of pie chart
+slices <- c(immediate_family_with_asd, immediate_family_without_asd)
+
+# Set labels for slices of pie chart
+lbls <- c('ASD', 'Non-ASD')
+# Rounds values to 100% format
+pct <- round(slices / sum(slices) * 100)
+# Add percents to labels
+lbls <- paste(lbls, pct)
+# Add % to labels
+lbls <- paste(lbls,'%', sep = '')
+
+# Pie chart plot
+pie(slices,
+    labels = lbls,
+    col = c('purple', 'green'),
+    main = 'Autism cases on persons with Immediate family ASD',
+    sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on individuals with immediate family members with ASD'
+    )
 
 # ================================================================================
-# CASE 05 - 
+# CASE 04 - Occurrences of ASD on individuals by who is completing their A10 test
+
+# medias de potuacao para casos de self feito o teste, medico, parente...etc
+# barplot das medias pra ver qual a mais alta
 
 # ================================================================================
-# CASE 06 - 
+# CASE 05 - ???
 
 # ================================================================================
-# CASE 07 - 
+# CASE 06 - ???
+
+# ================================================================================
+# CASE 07 - ???
 
 # ================================================================================
 # (DOUBT) CASE 08 - Ethnicity x Jaundice x ASD positive
@@ -124,8 +155,8 @@ scatterplot3d(filter_jaundice_asd,
 
 
 # TODO MAIN
-# Plot da relação entre indivíduos com familiares em ASD e suas classes
 # Plot de análise de % de quando preenchido pela propria pessoa / outros com ASD
+# Possível plot de scatter para médias e pontuações em relação à ??
 # Árvore de decisão para relevância de cada questão do teste A10
 # Definir acurácia pra essa árvore de decisão
 # Completar o paper no docs
@@ -133,6 +164,7 @@ scatterplot3d(filter_jaundice_asd,
 # TODO SIDE
 # Fix sort pra barplots serem em ordem
 # Fix ggplot para barplots terem grid
+# Plots bonitos (um melhor piechart)
 
 
 
@@ -151,3 +183,4 @@ scatterplot3d(filter_jaundice_asd,
 # A data de entrega e apresentação do trabalho será dia 02/12, durante a aula.
 # A dupla deverá, além de apresentar, entregar um relatório impresso, contendo também o
 # código R para execução.
+
