@@ -9,6 +9,9 @@ library(ggplot2)
 # Package for 3D plots
 library(scatterplot3d)
 
+# Package for Spider / Radar plots
+library(fmsb)
+
 # Creating dataframe object & reading the dataset file
 path <- './Autism-Adult-Data.arff'
 dataframe_autism <- data.frame()
@@ -30,11 +33,18 @@ names(dataframe_autism)[15] <- 'immediate_family_with_asd'
 # Rename column 'contry_of_res' to 'country_of_residence'
 names(dataframe_autism)[16] <- 'country_of_residence'
 
+# Rename column 'result' to 'A10_test_result'
+names(dataframe_autism)[18] <- 'A10_test_result'
+
 # Rename column 'relation' to 'who_is_completing_the_test'
 names(dataframe_autism)[20] <- 'who_is_completing_the_test'
 
 # Rename column 'Class/ASD' to 'class_asd'
 names(dataframe_autism)[21] <- 'class_asd'
+
+# ================================================================================
+# CASE 00 - General Data Visualizations
+plot(dataframe_autism)
 
 # ================================================================================
 # CASE 01 - Relation between occurrences of jaundice in patients diagnosed with ASD
@@ -123,13 +133,53 @@ pie(slices,
 
 # ================================================================================
 # CASE 04 - Occurrences of ASD on individuals by who is completing their A10 test
+filter_asd_yes <- filter(dataframe_autism, class_asd %in% c('YES'))
+
+filter_healthCareProfessional <- filter(dataframe_autism, who_is_completing_the_test %in% c('Health care professional'))
+filter_Parent <- filter(dataframe_autism, who_is_completing_the_test %in% c('Parent'))
+filter_Relative <- filter(dataframe_autism, who_is_completing_the_test %in% c('Relative'))
+filter_Self <- filter(dataframe_autism, who_is_completing_the_test %in% c('Self'))
+filter_Others <- filter(dataframe_autism, who_is_completing_the_test %in% c('Others'))
+
+# CLOUDY
+# nao terminadoo, btw na vdd esse tava pensando em mudar, n pensei bem a logica dele,
+# se quiser mudar ele todo, até mesmo a intenção do case, fica totalmente à vontadeee
+# c:
+
+geom_point(
+    
+          )
 
 # medias de potuacao para casos de self feito o teste, medico, parente...etc
 # barplot das medias pra ver qual a mais alta
 
 # ================================================================================
-# CASE 05 - ???
+# CASE 05 - Mean values for A10 test results based on who completed the test
 
+# CLOUDY nesse eu tava pensando em usar um spider / radar plot, roda pra tu ver como é bonitooo, a gente cosegue até ver no shape q gera, como q vai (talvez) vá ficar mó elevação nas partes q não são a self (caso nossa teoria esteja certa, pra +casos de asd na galera q n respondeu por sí o teste)
+
+# Create data: note in High school for Jonathan:
+data <- as.data.frame(matrix( sample( 2:20 , 5 , replace=T) , ncol=5))
+colnames(data) <- c("Health Care Professional", "Parent" , "Relative" , "Others" , "Self")
+
+# To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each topic to show on the plot!
+data <- rbind(rep(20,10) , rep(0,10) , data)
+
+# Check your data, it has to look like this!
+# head(data)
+
+# The default radar chart 
+radarchart(data,
+           pcol = 'green',
+           pfcol = rgb(0.647, 0.486, 0.941, 0.7),
+           plwd = 1,
+           cglcol = 'black',
+           cglwd = 0.8
+           )
+
+radarchart(
+    
+          )
 # ================================================================================
 # CASE 06 - ???
 
@@ -152,12 +202,13 @@ scatterplot3d(filter_jaundice_asd,
 
 
 
-
+# DOING
+# Plot stacked bars de análise de % de quando preenchido pela propria pessoa / outros com ASD
+# Plot de radar para médias e pontuações em relação à quem/oq do paciente fez o teste
 
 # TODO MAIN
-# Plot de análise de % de quando preenchido pela propria pessoa / outros com ASD
-# Possível plot de scatter para médias e pontuações em relação à ??
 # Árvore de decisão para relevância de cada questão do teste A10
+# Definir como plotar fodamente essa questão do A10 e a relevância dele (NOSSO CORE!!)
 # Definir acurácia pra essa árvore de decisão
 # Completar o paper no docs
 
