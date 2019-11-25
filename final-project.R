@@ -21,21 +21,30 @@ dataframe_autism <- dataframe_autism[-c(53), ]
 any(is.na(dataframe_autism))
 dataframe_autism <- na.omit(dataframe_autism)
 
+# Rename column 'jundice' to 'jaundice'
+names(dataframe_autism)[14] <- 'jaundice'
+
+# Rename column 'austim' to 'immediate_family_with_asd'
+names(dataframe_autism)[15] <- 'immediate_family_with_asd'
+
+# Rename column 'contry_of_res' to 'country_of_residence'
+names(dataframe_autism)[16] <- 'country_of_residence'
+
 # Rename column 'Class/ASD' to 'class_asd'
 names(dataframe_autism)[21] <- 'class_asd'
 
 # ================================================================================
-# CASE 01 - Relation between occurrences of jundice in patients diagnosed with ASD
-# Filter cases of ASD positive on occurrences of patients born with jundice
-filter_jundice_asd <- filter(dataframe_autism, jundice %in% c("yes"))
+# CASE 01 - Relation between occurrences of jaundice in patients diagnosed with ASD
+# Filter cases of ASD positive on occurrences of patients born with jaundice
+filter_jaundice_yes <- filter(dataframe_autism, jaundice %in% c("yes"))
     
 # Get total of 'yes' & 'no' on class_asd
-count(filter_jundice_asd, class_asd)
-jundice_with_asd <- 28 # Yes
-jundice_without_asd <- 31 # No
+count(filter_jaundice_yes, class_asd)
+jaundice_with_asd <- 28 # Yes
+jaundice_without_asd <- 31 # No
 
 # Set values for slices of pie chart
-slices <- c(jundice_with_asd, jundice_without_asd)
+slices <- c(jaundice_with_asd, jaundice_without_asd)
 
 # Set labels for slices of pie chart
 lbls <- c('ASD', 'Non-ASD')
@@ -49,68 +58,44 @@ lbls <- paste(lbls,'%', sep = '')
 # Pie chart plot
 pie(slices,
     labels = lbls,
-    col = rainbow(length(lbls)),
-    main = 'Occurrences of Autism on Jundice',
-    sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on positive cases of Jundice'
+    col = c("purple", "green"),
+    main = 'Occurrences of Autism on Jaundice',
+    sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on positive cases of Jaundice'
     )
 
 # ================================================================================
-# CASE 02 - Occurrences of ASD positive by different ethnicities
-
+# CASE 02 - Occurrences of ASD cases by different ethnicities
 # Fitting Labels horizontally
-par(las=2) # Make label text perpendicular to axis
-par(mar=c(5,8,4,2)) # Increase y-axis margin.
+par(las = 2) # Make label text perpendicular to axis
+par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
-filter_ethnicity_asd <- filter(dataframe_autism, class_asd %in% c('YES'))
-ehtnicity_asd <- table(filter_ethnicity_asd$class_asd, filter_ethnicity_asd$ethnicity)
+ehtnicity_asd <- table(dataframe_autism$class_asd, dataframe_autism$ethnicity)
 
 barplot(ehtnicity_asd,
-        main = 'Ethnicity x ASD Positive',
-        sub = '',
-        horiz=TRUE,
+        main = 'Ethnicity x ASD Cases',
+        sub = 'ASD Positive occurrences by different Ethnicities',
+        xlab = "ASD Cases",
+        col = c("green", "purple"),
         space = 0.2,
-        cex.names=0.7,
-        xlab = 'ASD Cases',
-        xlim = c(0, 120)
-        )
-
-geom_bar(ehtnicity_asd,
-         main = 'Ethnicity x ASD Positive',
-         sub = '',
-         horiz=TRUE,
-         space = 0.2,
-         cex.names=0.7,
-         border = TRUE,
-         xlab = 'ASD Cases',
-         xlim = c(0, 120)
+        horiz = TRUE,
+        cex.names = 0.9,
+        xlim = c(0, 250),
+        legend = rownames(ehtnicity_asd),
+        args.legend = list(
+            x = 230,
+            y = 10,
+            bty = "a"
+            ),
         )
 
 # ================================================================================
-# CASE 03 - Ethnicity x Jundice x ASD positive
-colors <- c("#999999", "#E69F00", "#56B4E9")
-scatterplot3d(filter_jundice_asd,
-              x = filter_jundice_asd$ethnicity,
-              y = filter_jundice_asd$jundice,
-              z = filter_jundice_asd$class_asd,
-              main = 'Ethnicity x Jundice x ASD Positive',
-              sub = '',
-              xlab = '',
-              ylab = '',
-              zlab = '',
-              color = colors
-              )
+# CASE 03 - 
+immediate_family_with_asd <- filter(dataframe_autism, immediate_family_with_asd %in% c('yes'))
 
 # ================================================================================
 # CASE 04 - 
-# Stacked Bar Plot with Colors and Legend
-filter_country_asd <- filter(dataframe_autism, class_asd %in% c('YES'))
-ehtnicity_asd <- table(filter_ethnicity_asd$class_asd, filter_ethnicity_asd$ethnicity)
 
-barplot(counts,
-        main = "Car Distribution by Gears and VS",
-        xlab = "Number of Gears",
-        col=c("darkblue","red"),
-        legend = rownames(counts))
+
 # ================================================================================
 # CASE 05 - 
 
@@ -121,15 +106,33 @@ barplot(counts,
 # CASE 07 - 
 
 # ================================================================================
-# CASE 08 - 
+# (DOUBT) CASE 08 - Ethnicity x Jaundice x ASD positive
+scatterplot3d(filter_jaundice_asd,
+              x = filter_jaundice_asd$ethnicity,
+              y = filter_jaundice_asd$jaundice,
+              z = filter_jaundice_asd$class_asd,
+              main = 'Ethnicity x Jaundice x ASD Positive',
+              sub = '',
+              xlab = '',
+              ylab = '',
+              zlab = '',
+              color = colors
+)
 
 
 
 
 
+# TODO MAIN
+# Plot da relação entre indivíduos com familiares em ASD e suas classes
+# Plot de análise de % de quando preenchido pela propria pessoa / outros com ASD
+# Árvore de decisão para relevância de cada questão do teste A10
+# Definir acurácia pra essa árvore de decisão
+# Completar o paper no docs
 
-
-# Analisar % de quando preenchido pela propria pessoa / outros com ASD
+# TODO SIDE
+# Fix sort pra barplots serem em ordem
+# Fix ggplot para barplots terem grid
 
 
 
