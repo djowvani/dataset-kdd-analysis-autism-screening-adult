@@ -1,0 +1,104 @@
+---
+title: "Tópicos avançados em banco de dados - Projeto Final"
+output: html_notebook
+---
+<h2>Autism Screening Adult Data Set<h2>
+<h5>Cláudia Melo Paes - 15162472</h5>
+<h5>Giovani Anhesini Bezerra - 17172164</h5>
+
+<h1>Introdução</h1>
+<hr>
+<p>Neste dataset, tratamos pela perspectiva de análise e Ciência de Dados, o Transtorno do Espectro Autístico (TEA).
+O mesmo, limita tanto a linguagem, comunicação, habilidades cognitivas, como também habilidades sociais. Desta forma, caracterizando uma condição do neurodesenvolvimento que é associada a custos significativos de assistência médica, porém que pode ser reduzida significativamente caso haja um diagnóstico precoce. Entretanto, esses diagnósticos tem longa espera e não são nada rentáveis.</p>
+
+<p>Revela-se cada vez mais através do impacto econômico pelo aumento dos casos de TEA ao redor do mundo, a urgência por desenvolvimento de métodos de triagem fáceis e eficazes para se implementar.</p>
+
+<p>Dito isto, tornar acessível uma triagem rápida e eficiente seria o cenário ideal onde se visa ajudar os profissionais de saúde, e informar os indivíduos se os mesmos devem buscar um diagnóstico clínico completo e formal.</p>
+
+<p>O crescimento rápido no número de casos de TEA em todo o mundo demanda dados relacionais às características comportamentais, porém são raros, o que dificulta a realização das análises completas, a fim de melhorar a eficiência, sensibilidade, especificidade e precisão preditiva do processo de triagem.</p>
+
+<p>Apenas se possui conjuntos de dados de autismo muito limitados, que associam à clínica ou à triagem, e em sua maioria de natureza genética.</p>
+
+<p>Por isso, é proposto por Fadi Thabtah, professor de análise de dados e membro do Departamento de Negócios & Tecnologia Digital do Instituto de Tecnologia de Manukau, em seu artigo (http://fadifayez.com/wp-content/uploads/2017/11/Autism-Spectrum-Disorder-Screening-Machine-Learning-Adaptation-and-DSM-5-Fulfillment.pdf) um novo conjunto de dados relacionado ao processo de triagem do autismo em adultos, que continha 20 recursos de dados a serem usados pelas análises adicionais, usados especialmente na determinação de alguns traços autísticos influentes, e na melhoria da classificação dos casos de TEA.</p>
+
+<p>Neste conjunto de dados, registramos dez recursos comportamentais através do Teste “AQ-10-Adult” (http://docs.autismresearchcentre.com/tests/AQ10.pdf) mais dez características individuais que se mostraram eficazes na detecção de casos de TEA a partir de controles na ciência do comportamento.</p>
+
+```{r}
+# =================================== Libraries ===================================
+# Package for reading .arff files
+library(foreign)
+
+# Packages for plots (tidyverse)
+library(dslabs)
+library(dplyr)
+library(ggplot2)
+
+# Package for Spider / Radar plots
+library(fmsb)
+
+# Library for Decision Trees
+library(rpart)
+library(rpart.plot)
+
+# Creating dataframe object & reading the dataset file
+path <- './Autism-Adult-Data.arff'
+dataframe_autism <- data.frame()
+dataframe_autism <- read.arff(path)
+
+# Removing line 53 from the dataframe - Outlier / Noise data found (383 years old woman)
+dataframe_autism <- dataframe_autism[-c(53), ]
+
+# Cheking & eliminating NA data (95 rows will be gone)
+any(is.na(dataframe_autism))
+dataframe_autism <- na.omit(dataframe_autism)
+
+# Renaming column names (FIX: jundice' to 'jaundice', 'austim' to 'immediate_family_with_asd', 'contry_of_res' to 'country_of_residence', 'result' to 'A10_test_result', 'who_is_completing_the_test', 'Class/ASD' to 'class_asd')
+colnames(dataframe_autism) <- c("A1_Score", "A2_Score", "A3_Score", "A4_Score", "A5_Score",
+                                     "A6_Score", "A7_Score", "A8_Score", "A9_Score", "A10_Score",
+                                     "age", "gender", "ethnicity", "jaundice",
+                                     "immediate_family_with_asd", "country_of_residence",
+                                     "used_app_before", "A10_test_result", "age_desc",
+                                     "who_is_completing_the_test", "class_asd")
+```
+
+<h1>asuhduahdgih</h1>
+
+```{r}
+# ==================================== CASE 00 ====================================
+# General Data Visualizations
+
+plot(dataframe_autism)
+
+# ==================================== CASE 01 ====================================
+# Relation between occurrences of jaundice in patients diagnosed with ASD
+
+# Filter cases of ASD positive on occurrences of patients born with jaundice
+filter_jaundice_yes <- filter(dataframe_autism, jaundice %in% c('yes'))
+    
+# Get total of 'yes' & 'no' on class_asd
+count(filter_jaundice_yes, class_asd)
+jaundice_with_asd <- 28 # Yes
+jaundice_without_asd <- 31 # No
+
+# Set values for slices of pie chart
+slices <- c(jaundice_with_asd, jaundice_without_asd)
+
+# Set labels for slices of pie chart
+lbls <- c('ASD', 'Non-ASD')
+# Rounds values to 100% format
+pct <- round(slices / sum(slices) * 100)
+# Add percents to labels
+lbls <- paste(lbls, pct)
+# Add % to labels
+lbls <- paste(lbls,'%', sep = '')
+
+# Pie chart plot
+pie(slices,
+    labels = lbls,
+    col = c('purple', 'green'),
+    main = 'Occurrences of Autism on Jaundice',
+    sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on positive cases of Jaundice'
+    )
+
+```
+

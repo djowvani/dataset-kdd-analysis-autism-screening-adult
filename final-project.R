@@ -1,3 +1,4 @@
+# =================================== Libraries ===================================
 # Package for reading .arff files
 library(foreign)
 
@@ -11,6 +12,10 @@ library(scatterplot3d)
 
 # Package for Spider / Radar plots
 library(fmsb)
+
+# Library for Decision Trees
+library(rpart)
+library(rpart.plot)
 
 # Creating dataframe object & reading the dataset file
 path <- './Autism-Adult-Data.arff'
@@ -154,8 +159,6 @@ barplot(who_test_asd,
 # ==================================== CASE 05 ====================================
 # Mean values for A10 test results based on who completed the test
     
-# CLOUDY nesse eu tava pensando em usar um spider / radar plot, roda pra tu ver como é bonitooo, a gente cosegue até ver no shape q gera, como q vai (talvez) vá ficar mó elevação nas partes q não são a self (caso nossa teoria esteja certa, pra +casos de asd na galera q n respondeu por sí o teste)
-
 # Create data: note in High school for Jonathan:
 data <- as.data.frame(matrix( sample( 2:20 , 5 , replace=T) , ncol=5))
 colnames(data) <- c("Health Care Professional", "Parent" , "Relative" , "Others" , "Self")
