@@ -24,30 +24,22 @@ dataframe_autism <- dataframe_autism[-c(53), ]
 any(is.na(dataframe_autism))
 dataframe_autism <- na.omit(dataframe_autism)
 
-# Rename column 'jundice' to 'jaundice'
-names(dataframe_autism)[14] <- 'jaundice'
+# Renaming column names (FIX: jundice' to 'jaundice', 'austim' to 'immediate_family_with_asd', 'contry_of_res' to 'country_of_residence', 'result' to 'A10_test_result', 'who_is_completing_the_test', 'Class/ASD' to 'class_asd')
+colnames(dataframe_autism) <- c("A1_Score", "A2_Score", "A3_Score", "A4_Score", "A5_Score",
+                                     "A6_Score", "A7_Score", "A8_Score", "A9_Score", "A10_Score",
+                                     "age", "gender", "ethnicity", "jaundice",
+                                     "immediate_family_with_asd", "country_of_residence",
+                                     "used_app_before", "A10_test_result", "age_desc",
+                                     "who_is_completing_the_test", "class_asd")
 
-# Rename column 'austim' to 'immediate_family_with_asd'
-names(dataframe_autism)[15] <- 'immediate_family_with_asd'
+# ==================================== CASE 00 ====================================
+# General Data Visualizations
 
-# Rename column 'contry_of_res' to 'country_of_residence'
-names(dataframe_autism)[16] <- 'country_of_residence'
-
-# Rename column 'result' to 'A10_test_result'
-names(dataframe_autism)[18] <- 'A10_test_result'
-
-# Rename column 'relation' to 'who_is_completing_the_test'
-names(dataframe_autism)[20] <- 'who_is_completing_the_test'
-
-# Rename column 'Class/ASD' to 'class_asd'
-names(dataframe_autism)[21] <- 'class_asd'
-
-# ================================================================================
-# CASE 00 - General Data Visualizations
 plot(dataframe_autism)
 
-# ================================================================================
-# CASE 01 - Relation between occurrences of jaundice in patients diagnosed with ASD
+# ==================================== CASE 01 ====================================
+# Relation between occurrences of jaundice in patients diagnosed with ASD
+
 # Filter cases of ASD positive on occurrences of patients born with jaundice
 filter_jaundice_yes <- filter(dataframe_autism, jaundice %in% c('yes'))
     
@@ -76,8 +68,9 @@ pie(slices,
     sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on positive cases of Jaundice'
     )
 
-# ================================================================================
-# CASE 02 - Occurrences of ASD cases by different ethnicities
+# ==================================== CASE 02 ====================================
+# Occurrences of ASD cases by different ethnicities
+
 # Fitting Labels horizontally
 par(las = 2) # Make label text perpendicular to axis
 par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
@@ -98,11 +91,12 @@ barplot(ehtnicity_asd,
             x = 230,
             y = 10,
             bty = 'a'
-            ),
+            )
         )
 
-# ================================================================================
-# CASE 03 - Occurrences of ASD on idividuals with immediate family members also with ASD
+# ==================================== CASE 03 ====================================
+# Occurrences of ASD on idividuals with immediate family members also with ASD
+
 # Filter cases of ASD positive on occurrences of patients with immediate parents with ASD
 immediate_family_with_asd <- filter(dataframe_autism, immediate_family_with_asd %in% c('yes'))
 
@@ -131,31 +125,35 @@ pie(slices,
     sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on individuals with immediate family members with ASD'
     )
 
-# ================================================================================
-# CASE 04 - Occurrences of ASD on individuals by who is completing their A10 test
+# ==================================== CASE 04 ====================================
+# Occurrences of ASD on individuals for who is completing their A10 test
+
 filter_asd_yes <- filter(dataframe_autism, class_asd %in% c('YES'))
 
-filter_healthCareProfessional <- filter(dataframe_autism, who_is_completing_the_test %in% c('Health care professional'))
-filter_Parent <- filter(dataframe_autism, who_is_completing_the_test %in% c('Parent'))
-filter_Relative <- filter(dataframe_autism, who_is_completing_the_test %in% c('Relative'))
-filter_Self <- filter(dataframe_autism, who_is_completing_the_test %in% c('Self'))
-filter_Others <- filter(dataframe_autism, who_is_completing_the_test %in% c('Others'))
+# Fitting Labels horizontally
+par(las = 2) # Make label text perpendicular to axis
+par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
-# CLOUDY
-# nao terminadoo, btw na vdd esse tava pensando em mudar, n pensei bem a logica dele,
-# se quiser mudar ele todo, até mesmo a intenção do case, fica totalmente à vontadeee
-# c:
+who_test_asd <- table(dataframe_autism$class_asd, dataframe_autism$who_is_completing_the_test)
 
-geom_point(
+barplot(who_test_asd,
+        main = 'Who completed A10 Test x ASD Cases',
+        sub = 'ASD Positive occurrences for who is completing the A10 Test by patient',
+        col = c('green', 'purple'),
+        space = 0.2,
+        horiz = TRUE,
+        cex.names = 0.8,
+        legend = rownames(who_test_asd),
+        args.legend = list(
+            x = 500,
+            y = 3,
+            bty = 'a'
+            )
+        )
+
+# ==================================== CASE 05 ====================================
+# Mean values for A10 test results based on who completed the test
     
-          )
-
-# medias de potuacao para casos de self feito o teste, medico, parente...etc
-# barplot das medias pra ver qual a mais alta
-
-# ================================================================================
-# CASE 05 - Mean values for A10 test results based on who completed the test
-
 # CLOUDY nesse eu tava pensando em usar um spider / radar plot, roda pra tu ver como é bonitooo, a gente cosegue até ver no shape q gera, como q vai (talvez) vá ficar mó elevação nas partes q não são a self (caso nossa teoria esteja certa, pra +casos de asd na galera q n respondeu por sí o teste)
 
 # Create data: note in High school for Jonathan:
@@ -180,14 +178,15 @@ radarchart(data,
 radarchart(
     
           )
-# ================================================================================
-# CASE 06 - ???
+# ==================================== CASE 06 ====================================
+# Country of Residence x ASD cases
 
-# ================================================================================
-# CASE 07 - ???
+# ==================================== CASE 07 ====================================
+# ???
 
-# ================================================================================
-# (DOUBT) CASE 08 - Ethnicity x Jaundice x ASD positive
+# ==================================== CASE 08 ====================================
+# Ethnicity x Jaundice x ASD positive
+
 scatterplot3d(filter_jaundice_asd,
               x = filter_jaundice_asd$ethnicity,
               y = filter_jaundice_asd$jaundice,
@@ -207,6 +206,7 @@ scatterplot3d(filter_jaundice_asd,
 # Plot de radar para médias e pontuações em relação à quem/oq do paciente fez o teste
 
 # TODO MAIN
+# FIX other ETHNICITY
 # Árvore de decisão para relevância de cada questão do teste A10
 # Definir como plotar fodamente essa questão do A10 e a relevância dele (NOSSO CORE!!)
 # Definir acurácia pra essa árvore de decisão
@@ -216,6 +216,7 @@ scatterplot3d(filter_jaundice_asd,
 # Fix sort pra barplots serem em ordem
 # Fix ggplot para barplots terem grid
 # Plots bonitos (um melhor piechart)
+# Fazer pie values via table de count (Vitor)
 
 
 
