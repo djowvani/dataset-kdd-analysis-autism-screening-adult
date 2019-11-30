@@ -7,9 +7,6 @@ library(dslabs)
 library(dplyr)
 library(ggplot2)
 
-# Package for 3D plots
-library(scatterplot3d)
-
 # Package for Spider / Radar plots
 library(fmsb)
 
@@ -28,6 +25,7 @@ dataframe_autism <- dataframe_autism[-c(53), ]
 # Cheking & eliminating NA data (95 rows will be gone)
 any(is.na(dataframe_autism))
 dataframe_autism <- na.omit(dataframe_autism)
+any(is.na(dataframe_autism))
 
 # Renaming column names (FIX: jundice' to 'jaundice', 'austim' to 'immediate_family_with_asd', 'contry_of_res' to 'country_of_residence', 'result' to 'A10_test_result', 'who_is_completing_the_test', 'Class/ASD' to 'class_asd')
 colnames(dataframe_autism) <- c("A1_Score", "A2_Score", "A3_Score", "A4_Score", "A5_Score",
@@ -80,11 +78,13 @@ pie(slices,
 par(las = 2) # Make label text perpendicular to axis
 par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
+# Make table with the desired values
 ehtnicity_asd <- table(dataframe_autism$class_asd, dataframe_autism$ethnicity)
 
-barplot(ehtnicity_asd,
+# Plot + sort
+barplot(ehtnicity_asd[,order(apply(ehtnicity_asd, 2, max))],
         main = 'Ethnicity x ASD Cases',
-        sub = 'ASD Positive occurrences by different Ethnicities',
+        sub = 'ASD occurrences by different Ethnicities',
         xlab = 'ASD Cases',
         col = c('green', 'purple'),
         space = 0.2,
@@ -97,6 +97,21 @@ barplot(ehtnicity_asd,
             y = 10,
             bty = 'a'
             )
+        )
+
+# Make table this time only with ASD positive cases
+ehtnicity_asd_yes <- table(filter_asd_yes$class_asd, filter_asd_yes$ethnicity)
+
+# Plot + sort
+barplot(ehtnicity_asd_yes[,order(apply(ehtnicity_asd, 2, max))],
+        main = 'Ethnicity x Positive ASD Cases',
+        sub = 'ASD Positive occurrences by different Ethnicities',
+        xlab = 'ASD Cases',
+        col = c('green', 'purple'),
+        space = 0.2,
+        horiz = TRUE,
+        cex.names = 0.9,
+        xlim = c(0, 120)
         )
 
 # ==================================== CASE 03 ====================================
@@ -141,16 +156,17 @@ par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
 who_test_asd <- table(dataframe_autism$class_asd, dataframe_autism$who_is_completing_the_test)
 
-barplot(who_test_asd,
-        main = 'Who completed A10 Test x ASD Cases',
+barplot(who_test_asd[,order(apply(who_test_asd, 2, max))],
+        main = 'Who completed the A10 Test x ASD Cases',
         sub = 'ASD Positive occurrences for who is completing the A10 Test by patient',
         col = c('green', 'purple'),
         space = 0.2,
         horiz = TRUE,
         cex.names = 0.8,
         legend = rownames(who_test_asd),
+        xlim = c(0, 600),
         args.legend = list(
-            x = 500,
+            x = 600,
             y = 3,
             bty = 'a'
             )
@@ -160,17 +176,18 @@ barplot(who_test_asd,
 # Mean values for A10 test results based on who completed the test
     
 # Create data: note in High school for Jonathan:
-data <- as.data.frame(matrix( sample( 2:20 , 5 , replace=T) , ncol=5))
+data <- as.data.frame(matrix(sample( 2:20 , 5 , replace = T) , ncol = 5))
 colnames(data) <- c("Health Care Professional", "Parent" , "Relative" , "Others" , "Self")
 
 # To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each topic to show on the plot!
 data <- rbind(rep(20,10) , rep(0,10) , data)
 
 # Check your data, it has to look like this!
-# head(data)
+head(data)
 
 # The default radar chart 
 radarchart(data,
+           sub = '',
            pcol = 'green',
            pfcol = rgb(0.647, 0.486, 0.941, 0.7),
            plwd = 1,
@@ -178,48 +195,90 @@ radarchart(data,
            cglwd = 0.8
            )
 
-radarchart(
-    
-          )
 # ==================================== CASE 06 ====================================
 # Country of Residence x ASD cases
 
 # ==================================== CASE 07 ====================================
-# ???
+# A10 Decision Tree
+
+# Expected results, the actual classes of the numbers
+expectedResult <- as.vector(dataframe_autism[, ncol(dataframe_autism)])
+
+# New dataframe with only the test boolean answers
+dataframe_a10 <- dataframe_autism[,1:10]
+
+# Setting seed for random number generator (for each time we need a new train set)
+set.seed(777)
+
+# Getting round value for 80% of total row lines from the dataframe
+sample_80percent <- floor(0.8 * nrow(dataframe_a10))
+
+# Setting up training data 80%
+train_index <- sample(seq_len(nrow(dataframe_a10)), size = sample_80percent)
+
+# Collect the dataframe rows up to the 80% index
+train <- dataframe_autism[train_index, ]
+# Collect the dataframe rows up to the remaining 20%
+test <- dataframe_autism[-train_index, ]
+
+# Setting up the decision tree
+decisionTree <- rpart(class_asd ~ ., train, method = "class", control = rpart.control(minsplit = 1))
+
+# Plot the tree
+plot <- rpart.plot(decisionTree, type = 3)
+
+# Amount of samples that reach the node, amount of samples that doesn't belong to the majority class
+classif <- test[,ncol(dataframe_autism)]
+test <- test[,-ncol(dataframe_autism)]
+pred <- predict(decisionTree, test, type = "class") # Prob or class
+
+# Accuracy measures for Decision Tree
+treeAccuracy <- length(which(pred == expectedResult))/length(expectedResult)
 
 # ==================================== CASE 08 ====================================
-# Ethnicity x Jaundice x ASD positive
+# ASD ocurrences based on age range - generation 
 
-scatterplot3d(filter_jaundice_asd,
-              x = filter_jaundice_asd$ethnicity,
-              y = filter_jaundice_asd$jaundice,
-              z = filter_jaundice_asd$class_asd,
-              main = 'Ethnicity x Jaundice x ASD Positive',
-              sub = '',
-              xlab = '',
-              ylab = '',
-              zlab = '',
-              color = colors
+# Add new column for generation
+for (i in 1:nrow(dataframe_autism)) {
+    if (dataframe_autism$age[i] <= 24)
+        dataframe_autism$generation[i] <- 'Gen Z'
+    if (dataframe_autism$age[i] >= 25 && dataframe_autism$age[i] <= 39)
+        dataframe_autism$generation[i] <- 'Millennials'
+    if (dataframe_autism$age[i] >= 34 && dataframe_autism$age[i] <= 44)
+        dataframe_autism$generation[i] <- 'Xennials'
+    if (dataframe_autism$age[i] >= 40 && dataframe_autism$age[i] <= 54)
+        dataframe_autism$generation[i] <- 'Gen X'
+    if (dataframe_autism$age[i] >= 55 && dataframe_autism$age[i] <= 73)
+        dataframe_autism$generation[i] <- 'Boomer'
+}
+
+generations_asd <- table(dataframe_autism$class_asd, dataframe_autism$generation)
+
+barplot(generations_asd[,order(apply(generations_asd, 2, max))],
+        main = 'Generations x ASD Cases',
+        sub = 'ASD Positive occurrences by different generations',
+        xlab = 'ASD Cases',
+        col = c('green', 'purple'),
+        space = 0.2,
+        horiz = TRUE,
+        cex.names = 0.9,
+        xlim = c(0, 250),
+        legend = rownames(ehtnicity_asd),
+        args.legend = list(
+            x = 250,
+            y = 2.2,
+            bty = 'a'
+        )
 )
 
-
-
-# DOING
-# Plot stacked bars de análise de % de quando preenchido pela propria pessoa / outros com ASD
-# Plot de radar para médias e pontuações em relação à quem/oq do paciente fez o teste
-
 # TODO MAIN
-# FIX other ETHNICITY
-# Árvore de decisão para relevância de cada questão do teste A10
-# Definir como plotar fodamente essa questão do A10 e a relevância dele (NOSSO CORE!!)
-# Definir acurácia pra essa árvore de decisão
+# FIX other ETHNICITY (Cloudy check)
+# ELON MUSK - https://canaltech.com.br/saude/elon-musk-fala-em-curar-o-autismo-com-as-inovacoes-da-neuralink-155367/
 # Completar o paper no docs
 
 # TODO SIDE
-# Fix sort pra barplots serem em ordem
-# Fix ggplot para barplots terem grid
-# Plots bonitos (um melhor piechart)
-# Fazer pie values via table de count (Vitor)
+# Barplots terem grid (usar ggplot é uma opção)
+# Piechart -- para --> Doughnut
 
 
 

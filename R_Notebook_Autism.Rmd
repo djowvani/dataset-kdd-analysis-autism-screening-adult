@@ -61,7 +61,7 @@ colnames(dataframe_autism) <- c("A1_Score", "A2_Score", "A3_Score", "A4_Score", 
                                      "who_is_completing_the_test", "class_asd")
 ```
 
-<h1>asuhduahdgih</h1>
+
 
 ```{r}
 # ==================================== CASE 00 ====================================
