@@ -404,18 +404,18 @@ treeAccuracy
 
 # ==================================== CASE 09 ====================================
 # PCA execution
-digits_pca <- prcomp(dataframe_digits[,-4097], center = TRUE, scale. = FALSE)
+autism_pca <- prcomp(dataframe_autism[,-608], center = TRUE, scale. = FALSE)
 
 # New dataframe
-newDataframe <- as.data.frame(predict(digits_pca, dataframe_digits))
-newDataframe$digit_class <- dataframe_digits[,4097]
+new_dataframe_autism <- as.data.frame(predict(autism_pca, dataframe_autism))
+new_dataframe_autism$class_asd <- dataframe_autism[,4097]
 
 # ==================================== CASE 10 ====================================
 # New A10 Decision Tree
 
-expectedResult <- as.vector(dataframe_autism[, ncol(dataframe_autism)])
-new_dataframe_a10 <- dataframe_autism[,1:10]
-new_dataframe_a10$class_asd <- dataframe_autism[,21]
+expectedResult <- as.vector(new_dataframe_autism[, ncol(new_dataframe_autism)])
+new_dataframe_a10 <- new_dataframe_autism[,1:10]
+new_dataframe_a10$class_asd <- new_dataframe_autism[,21]
 
 set.seed(777)
 
