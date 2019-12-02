@@ -401,3 +401,48 @@ barplot(treeAccuracy,
 )
 
 treeAccuracy
+
+# ==================================== CASE 09 ====================================
+# PCA execution
+digits_pca <- prcomp(dataframe_digits[,-4097], center = TRUE, scale. = FALSE)
+
+# New dataframe
+newDataframe <- as.data.frame(predict(digits_pca, dataframe_digits))
+newDataframe$digit_class <- dataframe_digits[,4097]
+
+# ==================================== CASE 10 ====================================
+# New A10 Decision Tree
+
+expectedResult <- as.vector(dataframe_autism[, ncol(dataframe_autism)])
+new_dataframe_a10 <- dataframe_autism[,1:10]
+new_dataframe_a10$class_asd <- dataframe_autism[,21]
+
+set.seed(777)
+
+sample_80percent <- floor(0.8 * nrow(new_dataframe_a10))
+
+train_index <- sample(seq_len(nrow(new_dataframe_a10)), size = sample_80percent)
+
+train <- new_dataframe_a10[train_index, ]
+test <- new_dataframe_a10[-train_index, ]
+
+new_decisionTree <- rpart(class_asd ~ ., train, method = "class", control = rpart.control(minsplit = 1))
+
+plot <- rpart.plot(new_decisionTree, type = 3)
+
+classif <- test[,ncol(new_dataframe_a10)]
+test <- test[,-ncol(new_dataframe_a10)]
+pred <- predict(new_decisionTree, test, type = "class") # Prob or class
+
+new_treeAccuracy <- length(which(pred == expectedResult))/length(expectedResult)
+
+barplot(new_treeAccuracy,
+        main = 'Decision Tree Accuracy',
+        xlab = 'Decision Tree',
+        col = 'green',
+        ylim = c(0, 1),
+        xlim = c(0, 1),
+        width = c(0.1, 0.1)
+)
+
+new_treeAccuracy
