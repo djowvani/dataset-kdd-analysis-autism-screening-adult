@@ -14,10 +14,19 @@ library(fmsb)
 library(rpart)
 library(rpart.plot)
 
+# Library for PCA
+library(factoextra)
+
 # Creating dataframe object & reading the dataset file
 path <- './Autism-Adult-Data.arff'
 dataframe_autism <- data.frame()
 dataframe_autism <- read.arff(path)
+
+#Renaming 'others' to 'Others' in Ethnicity line 658
+dataframe_autism[658, 13] <- 'Others'
+
+# Removing zero frequencies on ethnicities
+dataframe_autism$ethnicity <- droplevels(dataframe_autism$ethnicity)
 
 # Removing line 53 from the dataframe - Outlier / Noise data found (383 years old woman)
 dataframe_autism <- dataframe_autism[-c(53), ]
@@ -55,7 +64,7 @@ jaundice_without_asd <- 31 # No
 slices <- c(jaundice_with_asd, jaundice_without_asd)
 
 # Set labels for slices of pie chart
-lbls <- c('ASD', 'Non-ASD')
+lbls <- c('ASD Diganosed', 'Non-ASD')
 # Rounds values to 100% format
 pct <- round(slices / sum(slices) * 100)
 # Add percents to labels
@@ -72,49 +81,6 @@ pie(slices,
     )
 
 # ==================================== CASE 02 ====================================
-# Occurrences of ASD cases by different ethnicities
-
-# Fitting Labels horizontally
-par(las = 2) # Make label text perpendicular to axis
-par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
-
-# Make table with the desired values
-ehtnicity_asd <- table(dataframe_autism$class_asd, dataframe_autism$ethnicity)
-
-# Plot + sort
-barplot(ehtnicity_asd[,order(apply(ehtnicity_asd, 2, max))],
-        main = 'Ethnicity x ASD Cases',
-        sub = 'ASD occurrences by different Ethnicities',
-        xlab = 'ASD Cases',
-        col = c('green', 'purple'),
-        space = 0.2,
-        horiz = TRUE,
-        cex.names = 0.9,
-        xlim = c(0, 250),
-        legend = rownames(ehtnicity_asd),
-        args.legend = list(
-            x = 230,
-            y = 10,
-            bty = 'a'
-            )
-        )
-
-# Make table this time only with ASD positive cases
-ehtnicity_asd_yes <- table(filter_asd_yes$class_asd, filter_asd_yes$ethnicity)
-
-# Plot + sort
-barplot(ehtnicity_asd_yes[,order(apply(ehtnicity_asd, 2, max))],
-        main = 'Ethnicity x Positive ASD Cases',
-        sub = 'ASD Positive occurrences by different Ethnicities',
-        xlab = 'ASD Cases',
-        col = c('green', 'purple'),
-        space = 0.2,
-        horiz = TRUE,
-        cex.names = 0.9,
-        xlim = c(0, 120)
-        )
-
-# ==================================== CASE 03 ====================================
 # Occurrences of ASD on idividuals with immediate family members also with ASD
 
 # Filter cases of ASD positive on occurrences of patients with immediate parents with ASD
@@ -129,7 +95,7 @@ immediate_family_without_asd <- 44 # No
 slices <- c(immediate_family_with_asd, immediate_family_without_asd)
 
 # Set labels for slices of pie chart
-lbls <- c('ASD', 'Non-ASD')
+lbls <- c('ASD Diganosed', 'Non-ASD')
 # Rounds values to 100% format
 pct <- round(slices / sum(slices) * 100)
 # Add percents to labels
@@ -143,99 +109,157 @@ pie(slices,
     col = c('purple', 'green'),
     main = 'Autism cases on persons with Immediate family ASD',
     sub = 'Percentage times that Autism Spectrum Disorder (ASD) happenned on individuals with immediate family members with ASD'
-    )
+)
 
-# ==================================== CASE 04 ====================================
-# Occurrences of ASD on individuals for who is completing their A10 test
-
-filter_asd_yes <- filter(dataframe_autism, class_asd %in% c('YES'))
+# ==================================== CASE 03 ====================================
+# Occurrences of ASD cases by different ethnicities
 
 # Fitting Labels horizontally
 par(las = 2) # Make label text perpendicular to axis
 par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
-who_test_asd <- table(dataframe_autism$class_asd, dataframe_autism$who_is_completing_the_test)
+# Make table with the desired values
+ethnicity_asd <- table(dataframe_autism$class_asd, dataframe_autism$ethnicity)
 
-barplot(who_test_asd[,order(apply(who_test_asd, 2, max))],
-        main = 'Who completed the A10 Test x ASD Cases',
-        sub = 'ASD Positive occurrences for who is completing the A10 Test by patient',
+# Plot + sort
+barplot(ethnicity_asd[,order(apply(ethnicity_asd, 2, max))],
+        main = 'Ethnicity x ASD Cases',
+        sub = 'ASD occurrences by different Ethnicities',
+        xlab = 'ASD Cases',
         col = c('green', 'purple'),
         space = 0.2,
         horiz = TRUE,
-        cex.names = 0.8,
-        legend = rownames(who_test_asd),
-        xlim = c(0, 600),
+        cex.names = 0.9,
+        xlim = c(0, 250),
+        legend = rownames(ethnicity_asd),
         args.legend = list(
-            x = 600,
-            y = 3,
+            x = 230,
+            y = 10,
             bty = 'a'
-            )
         )
+)
 
-# ==================================== CASE 05 ====================================
-# Mean values for A10 test results based on who completed the test
-    
-# Create data: note in High school for Jonathan:
-data <- as.data.frame(matrix(sample( 2:20 , 5 , replace = T) , ncol = 5))
-colnames(data) <- c("Health Care Professional", "Parent" , "Relative" , "Others" , "Self")
+# Make table this time only with ASD positive cases
+ethnicity_asd_yes <- table(filter_asd_yes$class_asd, filter_asd_yes$ethnicity)
 
-# To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each topic to show on the plot!
-data <- rbind(rep(20,10) , rep(0,10) , data)
+# Plot + sort
+barplot(ethnicity_asd_yes[,order(apply(ethnicity_asd, 2, max))],
+        main = 'Ethnicity x Positive ASD Cases',
+        sub = 'ASD Positive occurrences by different Ethnicities',
+        xlab = 'ASD Cases',
+        col = c('green', 'purple'),
+        space = 0.2,
+        horiz = TRUE,
+        cex.names = 0.9,
+        xlim = c(0, 120)
+)
 
-# Check your data, it has to look like this!
-head(data)
-
-# The default radar chart 
-radarchart(data,
-           sub = '',
-           pcol = 'green',
-           pfcol = rgb(0.647, 0.486, 0.941, 0.7),
-           plwd = 1,
-           cglcol = 'black',
-           cglwd = 0.8
-           )
-
-# ==================================== CASE 06 ====================================
+# ==================================== CASE 04 ====================================
 # Country of Residence x ASD cases
 
-# ==================================== CASE 07 ====================================
-# A10 Decision Tree
+# Make table with the desired values
+country_of_residence <- table(dataframe_autism$class_asd, dataframe_autism$country_of_residence)
 
-# Expected results, the actual classes of the numbers
-expectedResult <- as.vector(dataframe_autism[, ncol(dataframe_autism)])
+# Dividing into sections first/second/third world
 
-# New dataframe with only the test boolean answers
-dataframe_a10 <- dataframe_autism[,1:10]
+# First world
+new_zeland  <- filter(dataframe_autism, country_of_residence %in% c('New Zealand'))
+united_states <- filter(dataframe_autism, country_of_residence %in% c('United States'))
+united_kingdom <- filter(dataframe_autism, country_of_residence %in% c('United Kingdom'))
 
-# Setting seed for random number generator (for each time we need a new train set)
-set.seed(777)
+count(new_zeland, class_asd)
+count(united_states, class_asd)
+count(united_kingdom, class_asd)
 
-# Getting round value for 80% of total row lines from the dataframe
-sample_80percent <- floor(0.8 * nrow(dataframe_a10))
+# New Zealand + United States + United Kingdom
+yes_first_world_asd <- 13 + 53 + 29
+no_first_world_asd <- 62 + 59 + 47
 
-# Setting up training data 80%
-train_index <- sample(seq_len(nrow(dataframe_a10)), size = sample_80percent)
+# Second world
+romania <- filter(dataframe_autism, country_of_residence %in% c('Romania'))
+armenia <- filter(dataframe_autism, country_of_residence %in% c('Armenia'))
+serbia <- filter(dataframe_autism, country_of_residence %in% c('Serbia'))
 
-# Collect the dataframe rows up to the 80% index
-train <- dataframe_autism[train_index, ]
-# Collect the dataframe rows up to the remaining 20%
-test <- dataframe_autism[-train_index, ]
+count(romania, class_asd)
+count(armenia, class_asd)
+count(serbia, class_asd)
 
-# Setting up the decision tree
-decisionTree <- rpart(class_asd ~ ., train, method = "class", control = rpart.control(minsplit = 1))
+# Romania + Armenia + Serbia
+yes_second_world_asd <- 1 + 1 + 0
+no_second_world_asd <- 2 + 2 + 1
 
-# Plot the tree
-plot <- rpart.plot(decisionTree, type = 3)
+# Third world
+sri_lanka <- filter(dataframe_autism, country_of_residence %in% c('Sri Lanka'))
+india <- filter(dataframe_autism, country_of_residence %in% c('India'))
+united_arab_emirates <- filter(dataframe_autism, country_of_residence %in% c('United Arab Emirates'))
 
-# Amount of samples that reach the node, amount of samples that doesn't belong to the majority class
-classif <- test[,ncol(dataframe_autism)]
-test <- test[,-ncol(dataframe_autism)]
-pred <- predict(decisionTree, test, type = "class") # Prob or class
+count(sri_lanka, class_asd)
+count(india, class_asd)
+count(united_arab_emirates, class_asd)
 
-# Accuracy measures for Decision Tree
-treeAccuracy <- length(which(pred == expectedResult))/length(expectedResult)
+# Sri Lanka + India + United Arab Emirates
+yes_third_world_asd <- 0 + 6 + 3
+no_third_world_asd <- 14 + 75 + 64
 
-# ==================================== CASE 08 ====================================
+# Comparing the sum by world (diagnosed and not)
+
+# 3rd World
+slices <- c(yes_third_world_asd, no_third_world_asd)
+lbls <- c('ASD Diganosed', 'Non-ASD')
+pct <- round(slices / sum(slices) * 100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,'%', sep = '')
+
+pie(slices,
+    labels = lbls,
+    col = c('purple', 'green'),
+    main = 'ASD cases on 3rd World Countries',
+    sub = 'ASD percentage occurrences of ASD cases on 3rd World counties'
+)
+
+# 2nd World
+slices <- c(yes_second_world_asd, no_second_world_asd)
+lbls <- c('ASD Diganosed', 'Non-ASD')
+pct <- round(slices / sum(slices) * 100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,'%', sep = '')
+
+pie(slices,
+    labels = lbls,
+    col = c('purple', 'green'),
+    main = 'ASD cases on 2nd World Countries',
+    sub = 'ASD percentage occurrences of ASD cases on 2nd World counties'
+)
+
+# 1st World
+slices <- c(yes_first_world_asd, no_first_world_asd)
+lbls <- c('ASD Diganosed', 'Non-ASD')
+pct <- round(slices / sum(slices) * 100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,'%', sep = '')
+
+pie(slices,
+    labels = lbls,
+    col = c('purple', 'green'),
+    main = 'ASD cases on 1st World Countries',
+    sub = 'ASD percentage occurrences of ASD cases on 1st World counties'
+)
+
+# Compairing the positive asd cases in first and third 
+slices <- c(yes_first_world_asd, yes_second_world_asd, yes_third_world_asd)
+lbls <- c('ASD First World', 'ASD Second World', 'ASD Third World')
+pct <- round(slices / sum(slices) * 100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,'%', sep = '')
+
+pie(slices,
+    labels = lbls,
+    col = c('purple', 'green', 'orange'),
+    main = 'ASD Positive cases on [1st / 2nd / 3rd] World',
+    sub = '1st, 2nd and 3rd World ASD positive cases comparsions'
+)
+
+# ==================================== CASE 05 ====================================
 # ASD ocurrences based on age range - generation 
 
 # Add new column for generation
@@ -263,7 +287,7 @@ barplot(generations_asd[,order(apply(generations_asd, 2, max))],
         horiz = TRUE,
         cex.names = 0.9,
         xlim = c(0, 250),
-        legend = rownames(ehtnicity_asd),
+        legend = rownames(ethnicity_asd),
         args.legend = list(
             x = 250,
             y = 2.2,
@@ -271,30 +295,109 @@ barplot(generations_asd[,order(apply(generations_asd, 2, max))],
         )
 )
 
-# TODO MAIN
-# FIX other ETHNICITY (Cloudy check)
-# ELON MUSK - https://canaltech.com.br/saude/elon-musk-fala-em-curar-o-autismo-com-as-inovacoes-da-neuralink-155367/
-# Completar o paper no docs
+# ==================================== CASE 06 ====================================
+# Occurrences of ASD on individuals for who is completing their A10 test
 
-# TODO SIDE
-# Barplots terem grid (usar ggplot é uma opção)
-# Piechart -- para --> Doughnut
+filter_asd_yes <- filter(dataframe_autism, class_asd %in% c('YES'))
 
+par(las = 2) # Make label text perpendicular to axis
+par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
+who_test_asd <- table(dataframe_autism$class_asd, dataframe_autism$who_is_completing_the_test)
 
+barplot(who_test_asd[,order(apply(who_test_asd, 2, max))],
+     main = 'Who completed the A10 Test x ASD Cases',
+     sub = 'ASD Positive occurrences for who is completing the A10 Test by patient',
+     col = c('green', 'purple'),
+     space = 0.2,
+     horiz = TRUE,
+     cex.names = 0.8,
+     legend = rownames(who_test_asd),
+     xlim = c(0, 600),
+     args.legend = list(
+         x = 600,
+         y = 3,
+         bty = 'a'
+     )
+)
 
-# Entender o dataset, e apresentar gráficos descritivos, com análises, que
-# representem os dados. Para isso, será necessário utilizar técnicas de visualização
-# de dados.
+# ==================================== CASE 07 ====================================
+# Mean values for A10 test results based on who completed the test
 
-# Se for pertinente, aplicar técnicas de redução de dimensionalidade
+# Fitting Labels horizontally
+par(las = 2) # Make label text perpendicular to axis
+par(mar = c(5, 8, 4, 2)) # Increase y-axis margin.
 
-# Aplicar um dos algoritmos estudados em Inteligência Artificial. Discutir a tarefa de
-# aprendizado de máquinas sendo tratada, e a escolha do algoritmo.
+self_occurences <- filter(dataframe_autism, who_is_completing_the_test %in% c('Self'))
+parent_occurences <- filter(dataframe_autism, who_is_completing_the_test %in% c('Parent'))
+relative_occurences <- filter(dataframe_autism, who_is_completing_the_test %in% c('Relative'))
+others_occurences <- filter(dataframe_autism, who_is_completing_the_test %in% c('Others'))
+professional_occurences <- filter(dataframe_autism, who_is_completing_the_test %in% c('Health care professional'))
 
-# Apresentar e discutir os resultados obtidos.
+means <- vector()
+means[1] <- round(nrow(filter(self_occurences, class_asd %in% c('YES'))) / nrow(self_occurences) * 100)
+means[2] <- round(nrow(filter(parent_occurences, class_asd %in% c('YES'))) / nrow(parent_occurences) * 100)
+means[3] <- round(nrow(filter(relative_occurences, class_asd %in% c('YES'))) / nrow(relative_occurences) * 100)
+means[4] <- round(nrow(filter(others_occurences, class_asd %in% c('YES'))) / nrow(others_occurences) * 100)
+means[5] <- round(nrow(filter(professional_occurences, class_asd %in% c('YES'))) / nrow(professional_occurences) * 100)
 
-# A data de entrega e apresentação do trabalho será dia 02/12, durante a aula.
-# A dupla deverá, além de apresentar, entregar um relatório impresso, contendo também o
-# código R para execução.
+occurrences_who_test_asd <- as.data.frame(means)
 
+barplot(means,
+        main = 'Who completed the A10 Test Occurences',
+        sub = 'ASD Positive occurrences for whom is completing the A10 Test by patient',
+        names.arg = c('Self', 'Parent', 'Relative', 'Others', 'H.Care Professional'),
+        col = 'purple',
+        horiz = TRUE,
+        xlim = c(0, 40),
+        cex.names = 0.8,
+)
+
+# ==================================== CASE 08 ====================================
+# A10 Decision Tree
+
+# Expected results, the actual classes of the numbers
+expectedResult <- as.vector(dataframe_autism[, ncol(dataframe_autism)])
+
+# New dataframe with only the test boolean answers
+dataframe_a10 <- dataframe_autism[,1:10]
+dataframe_a10$class_asd <- dataframe_autism[,21]
+
+# Setting seed for random number generator (for each time we need a new train set)
+set.seed(777)
+
+# Getting round value for 80% of total row lines from the dataframe
+sample_80percent <- floor(0.8 * nrow(dataframe_a10))
+
+# Setting up training data 80%
+train_index <- sample(seq_len(nrow(dataframe_a10)), size = sample_80percent)
+
+# Collect the dataframe rows up to the 80% index
+train <- dataframe_a10[train_index, ]
+# Collect the dataframe rows up to the remaining 20%
+test <- dataframe_a10[-train_index, ]
+
+# Setting up the decision tree
+decisionTree <- rpart(class_asd ~ ., train, method = "class", control = rpart.control(minsplit = 1))
+
+# Plot the tree
+plot <- rpart.plot(decisionTree, type = 3)
+
+# Amount of samples that reach the node, amount of samples that doesn't belong to the majority class
+classif <- test[,ncol(dataframe_a10)]
+test <- test[,-ncol(dataframe_a10)]
+pred <- predict(decisionTree, test, type = "class") # Prob or class
+
+# Accuracy measures for Decision Tree
+treeAccuracy <- length(which(pred == expectedResult))/length(expectedResult)
+
+barplot(treeAccuracy,
+        main = 'Decision Tree Accuracy',
+        xlab = 'Decision Tree',
+        col = 'green',
+        ylim = c(0, 1),
+        xlim = c(0, 1),
+        width = c(0.1, 0.1)
+)
+
+treeAccuracy
